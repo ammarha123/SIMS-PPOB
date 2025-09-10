@@ -37,4 +37,12 @@ class NutechAPI
         $body   = json_decode((string) $res->getBody(), true);
         return ['status' => $status, 'body' => is_array($body) ? $body : [], 'sent' => true];
     }
+
+     public function login(array $payload): array
+    {
+        $res    = $this->client->post($this->base . '/login', ['json' => $payload]);
+        $status = (int) $res->getStatusCode();
+        $body   = json_decode((string) $res->getBody(), true);
+        return ['status' => $status, 'body' => is_array($body) ? $body : []];
+    }
 }
