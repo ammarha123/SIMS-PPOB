@@ -64,7 +64,7 @@ class RegistrationController extends BaseController
             }
         }
         if (!$errors) {
-            $errors['api'] = $msg . " (HTTP {$status})";
+            $errors['api'] = $msg;
         }
         return redirect()->back()->withInput()->with('errors', $errors);
     }

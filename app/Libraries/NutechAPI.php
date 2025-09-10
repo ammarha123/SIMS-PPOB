@@ -38,11 +38,45 @@ class NutechAPI
         return ['status' => $status, 'body' => is_array($body) ? $body : [], 'sent' => true];
     }
 
-     public function login(array $payload): array
+    public function login(array $payload): array
     {
         $res    = $this->client->post($this->base . '/login', ['json' => $payload]);
         $status = (int) $res->getStatusCode();
         $body   = json_decode((string) $res->getBody(), true);
         return ['status' => $status, 'body' => is_array($body) ? $body : []];
+    }
+
+    public function profile(string $token): array
+    {
+        $headers = $this->headers;
+        $headers['Authorization'] = 'Bearer ' . $token;
+        $res    = $this->client->get($this->base . '/profile', ['headers' => $headers]);
+        $status = (int) $res->getStatusCode();
+        $body   = json_decode((string) $res->getBody(), true);
+        return ['status' => $status, 'body' => is_array($body) ? $body : []];
+    }
+
+    public function balance(string $token): array
+    {
+        $headers = $this->headers;
+        $headers['Authorization'] = 'Bearer ' . $token;
+        $res = $this->client->get($this->base . '/balance', ['headers' => $headers]);
+        return ['status' => (int)$res->getStatusCode(), 'body' => json_decode((string)$res->getBody(), true) ?? []];
+    }
+
+    public function services(string $token): array
+    {
+        $headers = $this->headers;
+        $headers['Authorization'] = 'Bearer ' . $token;
+        $res = $this->client->get($this->base . '/services', ['headers' => $headers]);
+        return ['status' => (int)$res->getStatusCode(), 'body' => json_decode((string)$res->getBody(), true) ?? []];
+    }
+
+    public function banners(string $token): array
+    {
+        $headers = $this->headers;
+        $headers['Authorization'] = 'Bearer ' . $token;
+        $res = $this->client->get($this->base . '/banner', ['headers' => $headers]);
+        return ['status' => (int)$res->getStatusCode(), 'body' => json_decode((string)$res->getBody(), true) ?? []];
     }
 }

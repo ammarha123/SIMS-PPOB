@@ -11,3 +11,6 @@ $routes->post('registration', 'Auth\RegistrationController::submit');
 $routes->get('/login', 'Auth\LoginController::index');
 $routes->post('login', 'Auth\LoginController::submit');
 $routes->get('/logout', 'Auth\LoginController::logout');
+$routes->get('debug-session', function () {
+    dd(session()->get());
+});
