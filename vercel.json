@@ -1,7 +1,8 @@
 {
   "version": 2,
   "functions": {
-    "api/index.php": { "runtime": "vercel-php@0.7.0" }
+    "public/index.php": { "runtime": "vercel-php@latest" },
+    "api/**/*.php":     { "runtime": "vercel-php@latest" }
   },
   "routes": [
     { "src": "/favicon.ico", "dest": "public/favicon.ico" },
