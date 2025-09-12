@@ -14,7 +14,7 @@ class NutechAPI
 
     public function __construct()
     {
-        $this->base = rtrim((string) env('app.apiBaseURL'), '/');
+        $this->base = rtrim((string) (env('app.apiBaseURL') ?: getenv('APP_API_BASEURL')), '/');
         if ($this->base === '') {
             throw new RuntimeException('Missing apiBaseURL in .env');
         }
