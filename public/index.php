@@ -53,6 +53,11 @@ require FCPATH . '../app/Config/Paths.php';
 
 $paths = new Paths();
 
+
+$paths = new Paths();
+$proto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'http';
+$host  = $_SERVER['HTTP_HOST'] ?? 'localhost';
+putenv('app.baseURL=' . $proto . '://' . $host . '/');
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';
 
