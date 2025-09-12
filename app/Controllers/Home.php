@@ -13,8 +13,8 @@ class Home extends BaseController
             return redirect()->to('/login');
         }
 
-        $name        = session('auth_name');
-        $avatar      = session('auth_avatar');
+        $name        = '';
+        $avatar      = '';
         $token       = session('auth_token');
         $saldoHidden = true;
 
@@ -28,6 +28,18 @@ class Home extends BaseController
                 $ok  = static fn(array $r): bool =>
                     (($r['status'] ?? 0) >= 200 && ($r['status'] ?? 0) < 300) && (($r['body']['status'] ?? 1) === 0);
 
+                $rp = $api->profile($token);
+                if ($ok($rp)) {
+                    $d = $rp['body']['data'] ?? [];
+                    if (!empty($d['profile_image'])) {
+                        $avatar = $d['profile_image'];
+                    }
+                    $fullName = trim(($d['first_name'] ?? '') . ' ' . ($d['last_name'] ?? ''));
+                    if ($fullName !== '') {
+                        $name = $fullName;
+                    }
+                }
+                
                 $rb = $api->balance($token);
                 if ($ok($rb)) {
                     $balance = (int) ($rb['body']['data']['balance'] ?? 0);

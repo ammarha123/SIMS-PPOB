@@ -12,8 +12,8 @@ class TransactionController extends BaseController
         if (! session('auth')) return redirect()->to('/login');
 
         $token  = session('auth_token');
-        $name   = session('auth_name');
-        $avatar = session('auth_avatar') ?: base_url('img/avatar.png');
+        $name   = '';
+        $avatar = '';
 
         $limit  = 5;
         $offset = 0;
@@ -24,6 +24,19 @@ class TransactionController extends BaseController
 
         try {
             $api = new NutechAPI();
+            $ok  = static fn(array $r): bool => (($r['status'] ?? 0) >= 200 && ($r['status'] ?? 0) < 300) && (($r['body']['status'] ?? 1) === 0);
+
+            $rp = $api->profile($token);
+            if ($ok($rp)) {
+                $d = $rp['body']['data'] ?? [];
+                if (!empty($d['profile_image'])) {
+                    $avatar = $d['profile_image'];
+                }
+                $fullName = trim(($d['first_name'] ?? '') . ' ' . ($d['last_name'] ?? ''));
+                if ($fullName !== '') {
+                    $name = $fullName;
+                }
+            }
 
             $rb = $api->balance($token);
             if (($rb['status'] ?? 0) >= 200 && ($rb['status'] ?? 0) < 300 && (($rb['body']['status'] ?? 1) === 0)) {
@@ -73,6 +86,7 @@ class TransactionController extends BaseController
             $api = new NutechAPI();
             $rh  = $api->history($token, $offset, $limit);
             $ok  = (($rh['status'] ?? 0) >= 200 && ($rh['status'] ?? 0) < 300) && (($rh['body']['status'] ?? 1) === 0);
+            
             if ($ok) {
                 foreach (($rh['body']['data']['records'] ?? []) as $r) {
                     $items[] = [
