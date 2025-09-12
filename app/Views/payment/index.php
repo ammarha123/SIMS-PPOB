@@ -25,7 +25,11 @@
             </div>
         </div>
     </div>
-     <!-- Form Pembayaran -->
+
+    <!-- Top Up Form Section -->
+    <?php $res = session()->getFlashdata('pay_result'); ?>
+
+    <!-- Form Pembayaran -->
     <div class="mt-5">
         <div class="mb-3">
             <small class="text-muted d-block">Pembayaran</small>
@@ -41,17 +45,55 @@
         <?php if (isset($errs['form'])): ?><div class="alert alert-danger"><?= esc($errs['form']) ?></div><?php endif; ?>
         <?php if (isset($errs['api'])):   ?><div class="alert alert-danger"><?= esc($errs['api'])   ?></div><?php endif; ?>
 
-        <form action="<?= base_url('payment/' . $service['code']) ?>" method="post" id="payForm">
+        <form id="payForm" action="<?= base_url('payment/' . $service['code']) ?>" method="post">
             <?= csrf_field() ?>
 
             <?php if ((int)$service['tariff'] > 0): ?>
                 <div class="mb-3">
                     <input type="text" class="form-control" value="Rp <?= number_format((int)$service['tariff'], 0, ',', '.') ?>" readonly>
-                    <input type="hidden" name="amount" value="<?= (int)$service['tariff'] ?>">
+                    <input type="hidden" name="amount" id="amount" value="<?= (int)$service['tariff'] ?>">
                 </div>
-                <button type="submit" class="btn btn-danger w-100">Bayar</button>
             <?php endif; ?>
+
+            <div class="d-grid">
+                <button type="button" class="btn btn-danger" id="btnPay">Bayar</button>
+            </div>
         </form>
+    </div>
+</div>
+
+
+<!-- Modal konfirmasi -->
+<div class="modal fade" id="confirmPay" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 text-center">
+      <div class="mx-auto mb-3 d-flex align-items-center justify-content-center"
+           style="width:64px;height:64px;border-radius:50%;background:#fdecea;color:#dc3545;">
+        <span class="fs-3">🧾</span>
+      </div>
+      <div>Beli <?= esc($service['name']) ?> senilai</div>
+      <h4 class="fw-bold my-2" id="confirmAmount">Rp0</h4>
+      <div class="d-grid gap-2 mt-2">
+        <button id="confirmYes" class="btn btn-link text-danger fw-semibold">Ya, lanjutkan Bayar</button>
+        <button class="btn btn-light" data-bs-dismiss="modal">Batalkan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Hasil -->
+<div class="modal fade" id="resultPay" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4 text-center">
+            <div id="resultIcon" class="mx-auto mb-3 d-flex align-items-center justify-content-center"
+                style="width:64px;height:64px;border-radius:50%;background:#e9f7ef;color:#28a745;">
+                <span class="fs-3">✔</span>
+            </div>
+            <div>Pembayaran <?= esc($service['name']) ?> sebesar</div>
+            <h4 class="fw-bold my-2" id="resultAmount">Rp0</h4>
+            <div id="resultText" class="mb-3">berhasil!!</div>
+            <a href="<?= base_url('/') ?>" class="text-danger fw-semibold">Kembali ke Beranda</a>
+        </div>
     </div>
 </div>
 
@@ -72,34 +114,46 @@
         }
     }
 
-    <?php if ((int)$service['tariff'] === 0): ?>
-            (function() {
-                const input = document.getElementById('amount');
-                const btn = document.getElementById('btnPay');
-                const parse = v => {
-                    const n = parseInt((v || '').toString().replace(/\D+/g, ''), 10);
-                    return isNaN(n) ? 0 : n
-                };
-                const fmt = n => n.toLocaleString('id-ID');
+   (function(){
+  const btn   = document.getElementById('btnPay');
+  const form  = document.getElementById('payForm');
+  const amtH  = document.getElementById('amount');
+  const fmt   = n => new Intl.NumberFormat('id-ID').format(n);
+  const parse = v => { const n = parseInt(String(v||'').replace(/\D+/g,''),10); return isNaN(n)?0:n; };
+  const modalResult = new bootstrap.Modal(document.getElementById('resultPay'));
 
-                const sync = () => {
-                    let n = parse(input.value);
-                    if (!n) {
-                        input.value = '';
-                        btn.disabled = true;
-                        return;
-                    }
-                };
+  btn.addEventListener('click', () => {
+    const n = parse(amtH.value);
+    document.getElementById('confirmAmount').textContent = 'Rp ' + fmt(n);
+    new bootstrap.Modal(document.getElementById('confirmPay')).show();
+  });
 
-                input.addEventListener('input', sync);
-                input.addEventListener('blur', sync);
-                sync();
+  document.getElementById('confirmYes').addEventListener('click', () => {
+    const n = parse(amtH.value);
+    if (!n) return;
+    bootstrap.Modal.getInstance(document.getElementById('confirmPay')).hide();
+    form.submit();
+  });
 
-                document.getElementById('payForm').addEventListener('submit', () => {
-                    input.value = parse(input.value);
-                    btn.disabled = true;
-                });
-            })();
-    <?php endif; ?>
+  const serverRes = <?= json_encode($res ?? null) ?>;
+        if (serverRes) {
+            const ok = !!serverRes.ok,
+                amt = parseInt(serverRes.amount || 0, 10),
+                msg = serverRes.message || (ok ? 'Payment berhasil.' : 'Payment gagal.');
+            document.getElementById('resultAmount').textContent = 'Rp' + fmt(amt);
+            document.getElementById('resultText').textContent = msg;
+            const ic = document.getElementById('resultIcon');
+            if (ok) {
+                ic.style.background = '#e9f7ef';
+                ic.style.color = '#28a745';
+                ic.innerHTML = '<span class="fs-3">✔</span>';
+            } else {
+                ic.style.background = '#fdecea';
+                ic.style.color = '#dc3545';
+                ic.innerHTML = '<span class="fs-3">✖</span>';
+            }
+            modalResult.show();
+        }
+})();
 </script>
 <?= $this->endSection() ?>

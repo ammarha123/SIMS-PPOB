@@ -82,7 +82,7 @@ class PaymentController extends BaseController
 
         try {
             $api = new NutechAPI();
-
+           
             $rs = $api->services($token);
             $ok = (($rs['status'] ?? 0) >= 200 && ($rs['status'] ?? 0) < 300) && (($rs['body']['status'] ?? 1) === 0);
             if ($ok) {
@@ -100,22 +100,30 @@ class PaymentController extends BaseController
                 $balance = (int)($rb['body']['data']['balance'] ?? 0);
             }
         } catch (\Throwable $e) {
-            return redirect()->back()->withInput()->with('errors', ['api' => 'Gagal memuat data.']);
+            return redirect()->to('/payment/' . $serviceCode)
+                ->withInput()
+                ->with('errors', ['api' => 'Gagal memuat data.']);
         }
 
         $charge = $tariff > 0 ? $tariff : $amount;
         if ($charge <= 0) {
-            return redirect()->back()->withInput()->with('errors', ['form' => 'Nominal tidak valid.']);
+            return redirect()->to('/payment/' . $serviceCode)
+                ->withInput()
+                ->with('errors', ['form' => 'Nominal tidak valid.']);
         }
         if ($balance < $charge) {
-            return redirect()->back()->withInput()->with('errors', ['form' => 'Saldo tidak mencukupi.']);
+            return redirect()->to('/payment/' . $serviceCode)
+                ->withInput()
+                ->with('errors', ['form' => 'Saldo tidak mencukupi.']);
         }
 
         try {
             $api = new NutechAPI();
             $response = $api->transaction($token, $serviceCode);
         } catch (\Throwable $e) {
-            return redirect()->back()->withInput()->with('errors', ['api' => 'Gagal memproses transaksi.']);
+            return redirect()->to('/payment/' . $serviceCode)
+                ->withInput()
+                ->with('errors', ['api' => 'Gagal memproses transaksi.']);
         }
 
         $http = (int) ($response['status'] ?? 0);
@@ -123,19 +131,16 @@ class PaymentController extends BaseController
         $ok   = ($http >= 200 && $http < 300) && ((int) ($body['status'] ?? 1) === 0);
 
         if (! $ok) {
-            return redirect()->back()->withInput()->with('errors', ['api' => $body['message'] ?? 'Transaksi gagal.']);
+            return redirect()->to('/payment/' . $serviceCode)
+                ->withInput()
+                ->with('errors', ['api' => $body['message'] ?? 'Transaksi gagal.']);
         }
-
-        // kalau mau tampilkan struk/nota: simpan di flashdata/sesi
-        session()->setFlashdata('last_tx', $body['data'] ?? [
-            'invoice_number'   => null,
-            'service_code'     => $serviceCode,
-            'service_name'     => $serviceName,
-            'transaction_type' => 'PAYMENT',
-            'total_amount'     => $charge,
-            'created_on'       => date('c'),
-        ]);
-
-        return redirect()->to('/')->with('success', $body['message'] ?? 'Transaksi berhasil.');
+        return redirect()->to('/payment/' . $serviceCode)
+            ->with('pay_result', [
+                'ok'      => true,
+                'amount'  => $charge,
+                'message' => $body['message'] ?? 'Transaksi berhasil.',
+                'data'    => $body['data'] ?? null,
+            ]);
     }
 }
