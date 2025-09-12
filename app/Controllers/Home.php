@@ -59,7 +59,7 @@ class Home extends BaseController
         }
 
         return view('index', [
-            'title'       => 'Home Page',
+            'title'       => 'Home - SIMS PPOB',
             'name'        => $name,
             'avatar'      => $avatar,
             'saldoHidden' => $saldoHidden,
