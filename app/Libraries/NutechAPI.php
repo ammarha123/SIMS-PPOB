@@ -14,10 +14,18 @@ class NutechAPI
 
     public function __construct()
     {
-        $base = env('app.apiBaseURL', 'APP_API_BASE_URL');
-        $this->base = rtrim((string) $base, '/');
+        $this->base = rtrim(
+            (string) (
+                env('app.apiBaseURL') ??
+                getenv('APP_API_BASE_URL') ??
+                ($_ENV['APP_API_BASE_URL'] ?? null) ??
+                ''
+            ),
+            '/'
+        );
+
         if ($this->base === '') {
-            throw new RuntimeException('Missing apiBaseURL in .env');
+            throw new RuntimeException('Missing API base URL (set APP_API_BASE_URL or app.apiBaseURL)');
         }
         $this->headers = [
             'Accept'       => 'application/json',
