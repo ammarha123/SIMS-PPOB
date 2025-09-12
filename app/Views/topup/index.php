@@ -37,8 +37,9 @@
         <div class="col-8 mt-4">
             <form method="post" action="/topup" id="topupForm">
                 <?= csrf_field() ?>
-                <div class="mb-3">
-                    <input type="text" inputmode="numeric" name="nominal" id="nominal" class="form-control" placeholder="Masukkan nominal Top Up" value="<?= old('nominal') ?>">
+                <div class="mb-3 position-relative">
+                    <i class="bi bi-credit-card position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+                    <input type="text" inputmode="numeric" name="nominal" id="nominal" class="form-control ps-5" placeholder="Masukkan nominal Top Up" value="<?= old('nominal') ?>">
                 </div>
                 <button type="button" id="btnTopup" class="btn btn-danger w-100" disabled>Top Up</button>
             </form>

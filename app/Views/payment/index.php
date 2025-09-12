@@ -49,8 +49,9 @@
             <?= csrf_field() ?>
 
             <?php if ((int)$service['tariff'] > 0): ?>
-                <div class="mb-3">
-                    <input type="text" class="form-control" value="Rp <?= number_format((int)$service['tariff'], 0, ',', '.') ?>" readonly>
+                <div class="mb-3 position-relative">
+                    <i class="bi bi-wallet position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+                    <input type="text" class="form-control ps-5" value="Rp <?= number_format((int)$service['tariff'], 0, ',', '.') ?>" readonly>
                     <input type="hidden" name="amount" id="amount" value="<?= (int)$service['tariff'] ?>">
                 </div>
             <?php endif; ?>
