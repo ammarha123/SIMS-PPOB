@@ -21,7 +21,7 @@
                     <h3 class="fw-bold mt-2 mb-0" id="saldoText">
                         Rp <?= $saldoHidden ? '••••••••••' : number_format((float)$balance, 0, ',', '.') ?>
                     </h3>
-                    <a href="#" class="link-light small text-decoration-none mt-2 d-inline-block" onclick="toggleSaldo(event)">Lihat Saldo</a>
+                    <a href="#" class="link-light small text-decoration-none mt-2 d-inline-block" id="saldo_status" onclick="toggleSaldo(event)">Lihat Saldo 👁</a>
                 </div>
             </div>
         </div>
@@ -29,13 +29,15 @@
 
     <!-- Servis Section -->
     <div class="mt-5 d-flex flex-wrap gap-4">
-        <?php foreach (($services ?? []) as $svc): ?>
-            <div class="text-center" style="width:80px;">
+        <?php foreach (($services ?? []) as $svc):
+            $code = $svc['service_code'] ?? $svc['code'] ?? '';
+        ?>
+            <a class="text-center text-decoration-none text-body" href="<?= base_url('payment/' . $code) ?>" style="width:80px;">
                 <div class="mb-2">
                     <img src="<?= esc($svc['service_icon'] ?? '') ?>" alt="" width="40" height="40" style="object-fit:contain;">
                 </div>
                 <small><?= esc($svc['service_name'] ?? '-') ?></small>
-            </div>
+            </a>
         <?php endforeach; ?>
     </div>
 
@@ -75,14 +77,17 @@
 <script>
     function toggleSaldo(e) {
         e.preventDefault();
-        const el = document.getElementById('saldoText');
-        if (!el) return;
-        if (el.dataset.shown === '1') {
-            el.textContent = 'Rp ••••••••••';
-            el.dataset.shown = '0';
+        const balance = document.getElementById('saldoText');
+        const saldo_status = document.getElementById('saldo_status')
+        if (!balance) return;
+        if (balance.dataset.shown === '1') {
+            balance.textContent = 'Rp ••••••••••';
+            balance.dataset.shown = '0';
+            saldo_status.textContent = "Lihat Saldo 👁"
         } else {
-            el.textContent = 'Rp <?= number_format((float)$balance, 0, ',', '.') ?>';
-            el.dataset.shown = '1';
+            balance.textContent = 'Rp <?= number_format((float)$balance, 0, ',', '.') ?>';
+            balance.dataset.shown = '1';
+            saldo_status.textContent = "Tutup Saldo"
         }
     }
 </script>

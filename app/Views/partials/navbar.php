@@ -12,9 +12,9 @@
 
         <div class="collapse navbar-collapse" id="navMain">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
-                <li class="nav-item"><a class="nav-link" href="#">Top Up</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Transaction</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Akun</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= base_url('/topup') ?>">Top Up</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= base_url('/transaction') ?>">Transaction</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= base_url('/profile') ?>">Akun</a></li>
                 <li class="nav-item">
                     <a class="btn btn-outline-secondary btn-sm" href="<?= base_url('logout') ?>">Logout</a>
                 </li>
